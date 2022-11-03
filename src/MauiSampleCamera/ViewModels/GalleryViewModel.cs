@@ -96,4 +96,88 @@ public partial class GalleryViewModel : ObservableObject
 			IsBusy = false;
 		}
 	}
+
+	[RelayCommand]
+	private Task AddPhoto()
+	{
+		return AddToGallery(false);
+	}
+
+	[RelayCommand]
+	private Task AddVideo()
+	{
+		return AddToGallery(true);
+	}
+
+	[RelayCommand]
+	private Task OpenPhoto(CaptureDetails capture)
+	{
+		return Open(capture);
+	}
+
+	private async Task Open(CaptureDetails capture)
+	{
+		if (!_mediaPicker.IsCaptureSupported)
+		{
+			await Shell.Current.DisplayAlert("Error", "Camera not available", "OK");
+			return;
+		}
+	}
+
+
+	private async Task AddToGallery(bool isVideo)
+	{
+		// return if the app is already performing another operation
+		if (IsBusy)
+		{
+			return;
+		}
+
+		// show an error message if the camera is not available on the device
+		if (!_mediaPicker.IsCaptureSupported)
+		{
+			await Shell.Current.DisplayAlert("Error", "Camera not available", "OK");
+			return;
+		}
+
+		try
+		{
+			// mark as busy while using the camera
+			IsBusy = true;
+
+			FileResult file = isVideo ? await _mediaPicker.PickVideoAsync() : await _mediaPicker.PickPhotoAsync();
+
+			// file is null if the user cancels the operation
+			if (file != null)
+			{
+				string localFilePath = Path.Combine(GalleryFolder, file.FileName);
+
+				// save the file into the gallery folder
+				using FileStream localFileStream = File.OpenWrite(localFilePath);
+#if WINDOWS
+				// on Windows file.OpenReadAsync() throws an exception
+				using Stream sourceStream = File.OpenRead(file.FullPath);
+#else
+				using Stream sourceStream = await file.OpenReadAsync();
+#endif
+
+				await sourceStream.CopyToAsync(localFileStream);
+
+				// add the file path to the list to display the picture on the main page
+				Files.Add(new CaptureDetails()
+				{
+					FileName = file.FileName,
+					Path = localFilePath,
+				});
+			}
+		}
+		catch (Exception ex)
+		{
+			await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+		}
+		finally
+		{
+			IsBusy = false;
+		}
+	}
 }

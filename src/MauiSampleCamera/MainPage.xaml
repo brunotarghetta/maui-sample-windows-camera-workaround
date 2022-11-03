@@ -10,7 +10,7 @@
     <Grid
         ColumnDefinitions="*,*"
         ColumnSpacing="5"
-        RowDefinitions="*,Auto"
+        RowDefinitions="*,Auto,Auto"
         RowSpacing="0">
 
         <!--Show a list of previews of the captured files-->
@@ -31,8 +31,16 @@
                             BorderColor="Transparent"
                             Background="Transparent">
                             <Grid Padding="0" ColumnDefinitions="*,*">
-                                <Image Source="{Binding Path}" Aspect="AspectFill" HeightRequest="150"/>
+                                <Image Source="{Binding Path}" HeightRequest="150" WidthRequest="250" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Aspect="AspectFit"/>
                                 <Label Text="{Binding FileName}" FontSize="16" Grid.Column="1" Padding="10" />
+                                <!--<Button
+                                    Margin="20"
+                                    Text="Open photo"
+                                    Grid.Column="2" 
+                                    Padding="10" 
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:GalleryViewModel}}, Path=OpenPhotoCommand}"
+                                    CommandParameter="{Binding .}"
+                                    />-->
                             </Grid>
                         </Frame>
                     </Grid>
@@ -58,6 +66,26 @@
             Text="Capture video"
             SemanticProperties.Hint="Capture video"
             Command="{Binding CaptureVideoCommand}"
+            HorizontalOptions="Center"/>
+
+        <!--Open file explorer and add photo to gallery-->
+        <Button
+            Margin="20"
+            Grid.Row="2"
+            Grid.Column="0"
+            Text="Add photo"
+            SemanticProperties.Hint="Add photo"
+            Command="{Binding AddPhotoCommand}"
+            HorizontalOptions="Center"/>
+
+        <!--Open file explorer and add video to gallery-->
+        <Button
+            Margin="20"
+            Grid.Row="2"
+            Grid.Column="1"
+            Text="Add video"
+            SemanticProperties.Hint="Add video"
+            Command="{Binding AddVideoCommand}"
             HorizontalOptions="Center"/>
 
         <!--Show an activity indicator while the application is busy-->
